@@ -1,2 +1,2 @@
 # agds_report_fabricemettler
-Report for Applied Geodät Science I - Fabrice Mettler
+Report for Applied Geodata Science I - Fabrice Mettler
