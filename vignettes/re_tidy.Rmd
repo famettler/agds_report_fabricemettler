@@ -74,7 +74,7 @@ to be slightly positive.
 numbers mean? Do they support your initial hypothesis? Why so, why not?
 There are differences of the LRR across the different experiments as some show
 positive values and other negative. Overall, the analysis suggest that
-elevated CO2 has only a minor effect on the SOC. 
+elevated CO2 has only a minor effect on SOC.
 
 
 
