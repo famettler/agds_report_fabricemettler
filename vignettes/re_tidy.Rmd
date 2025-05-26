@@ -13,7 +13,7 @@ library(tidyr)
 library(readr)
 library(stringr)
 library(purrr)
-soil_organic_carbon<- read_csv("1249534s1-s6.csv") # reading in the data
+soil_organic <- read_csv("../data/1249534s1-s6 Kopie.csv") # reading in the data
 ```
 
 # Calculation of the log-response ratio within each experiment
