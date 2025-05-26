@@ -1,0 +1,24 @@
+---
+title: "Stepwise Forward Regression"
+author: "Fabrice Mettler"
+date: "2025-05-26"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(readr)
+data_stepwies <- read_csv("./data/df_for_stepwise_regression.csv")
+```
+
+
+
+```{r }
+summary(cars)
+```
+
+
+
+```{r }
+plot(pressure)
+```
+
