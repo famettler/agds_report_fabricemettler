@@ -1,0 +1,108 @@
+---
+title: "Telling a story from data"
+author: "Fabrice Mettler"
+date: "2025-05-05"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(ggplot2)
+library(readr)
+library(lubridate)
+library(dplyr)
+library(tidyverse)
+
+airquality <- datasets::airquality # reading in the data
+```
+## About the dataset
+The data set "airquality" contains measurements of the air quality in New York
+from May 1, 1973 to September 30, 1973. The data frame contains 153
+observations on 6 numeric variables including the mean ozone (ppb) from 1300 
+to 1500 hours at Roosevelt Island, solar radiation in Langleys in the frequency
+band 4000-7700 Angstroms from 0800 to 1200 hours at Central Park, average wind
+speed (miles/h) at 0700 and 1000 hours at LaGuardia Airport, the maximal
+temperature (°F) at LaGuardia Airport, the month of the year and the 
+day of the month.
+
+I removed NAs and introduced a new column called "Dates".
+
+```{r}
+colSums(is.na(airquality)) # checking if there are NAs in the data set
+airquality_clean <- airquality |> # removing NAs
+  drop_na()
+
+airquality_clean <- airquality_clean |> #  create a new column with the dates
+  mutate(
+    Month = as.numeric(Month),
+    Dates = make_date(year = 1973, month = Month, day = Day))
+
+# airquality_clean$Month <- as.factor(airquality_clean$Month)
+
+knitr::kable(head(airquality_clean)) # presenting an overview of the data set
+```
+
+### Question to answer:
+What is the temporal pattern of ozone over the analysed time (May - September) 
+and how does it correlate with temperature?
+
+### Analysis
+To get an overview of the data, I present the range and mean of
+measured ozone and the temperature.
+
+```{r}
+summary_airquality <- airquality_clean |>
+  summarise(
+    min_ozone = min(Ozone),
+    max_ozone = max(Ozone),
+    mean_ozone = mean(Ozone),
+    min_temp = min(Temp),
+    max_temp = max(Temp),
+    mean_temp = mean(Temp)
+  )
+
+knitr::kable(summary_airquality, caption = "Some Summaries of the data set")
+
+```
+
+The first plot presents the measured ozone over time:
+
+```{r}
+ggplot(airquality_clean, aes(x = Dates, y = Ozone, colour = Temp)) +
+  geom_point() +
+  geom_line() +  # optional: connects the points in order
+  labs(title = "Temporal pattern of ozone", 
+       x = "Date",
+       y = "Ozone (ppb)",
+       colour = "Temperature (°F)") +
+  scale_color_gradient(low = "blue", high = "orange") +
+  theme_classic()
+
+```
+
+
+```{r}
+ggplot(
+  data = airquality_clean,
+  aes(x = Temp, y = Ozone, colour = factor(Month))) +
+  geom_point(alpha = 1) +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(title = "Plot", 
+       x = "Temperature (°F)",
+       y = "Ozone (ppb)",
+       color = "Month") +
+  scico::scale_color_scico_d(palette = "romaO")
+```
+
+```{r}
+ozone_residuals <- lm(Ozone ~ Temp, data = airquality_clean)$residuals
+
+
+ggplot(
+  data = airquality_clean,
+  aes(x = Dates, y = Ozone, colour = Temp)) +
+  geom_point(alpha = 1) +
+  labs(x = "Temperature (F)",
+       y = "Ozone (ppb)")
+```
+
+
