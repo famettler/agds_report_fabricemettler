@@ -2,11 +2,14 @@
 
 stepwise_forward <- function(data, response, predictors) {
   # starting with an empty model
-  best_models <- list()
-  best_AICs <- c()
+  null_formula <- as.formula(paste(response, "~ 1"))
+  empty_model <- lm(null_formula, data = data)
+  
+  best_models <- list(empty_model)
+  best_AICs <- c(empty_model)
   current_predictors <-c()
   remaining_predictors <- predictors
-  best_AIC <- Inf
+  best_AIC <- AIC(empty_model)
   function_stop <- FALSE
   
   while (!function_stop && length(remaining_predictors) > 0) {
