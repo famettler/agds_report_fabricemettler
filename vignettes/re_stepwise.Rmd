@@ -5,6 +5,8 @@ date: "2025-05-26"
 output: html_document
 ---
 
+## General informations
+
 ```{r setup,  include=FALSE}
 library(readr)
 library(purrr)
@@ -15,11 +17,12 @@ data_stepwise <- read_csv("../data/df_for_stepwise_regression.csv") # loading th
 In this report exercise I will perform a step wise forward regression for the
 task of modelling the GPP as a function of predictors available in the data set.
 
+## Evaluation of the bivariate models
 For that, I start with bivariate models to evaluate which predictor fits best.
 
 ```{r }
 predictors <- data_stepwise |> # defining the predictors
-  select(- siteid, -TIMESTAMP, - GPP_NT_VUT_REF) |>
+  select(- siteid, -TIMESTAMP, - GPP_NT_VUT_REF) |> 
   names()
 
 bivariate_regressions <- predictors |> # creating a linear regression for each predictor
@@ -43,10 +46,53 @@ bivariate_regressions |>
 
 ```
 
-The predictor with the highest R^2 is PPFD_IN
+The predictor with the highest R^2 is PPFD_IN. explain what it is and why it makes sense...
+
+## Stepwise forward regression
+
+```{r }
+source("../R/stepwise_forward.R")
+model_1 <- stepwise_forward(data = data_stepwise, response = "GPP_NT_VUT_REF", predictors = predictors)
+
+```
 
 
 ```{r }
+rsq_vals <- map_dbl(model_1$final_model, ~ summary(.x)$r.squared)
 
+rsq_plot <- tibble(
+  Step = seq_along(rsq_vals),
+  R_squared = rsq_vals
+) |>
+  ggplot(aes(x = Step, y = R_squared)) +
+  geom_line(color = "blue") +
+  geom_point(color = "black", size = 2) +
+  labs(title = "R² per Step of Forward Selection",
+       x = "Step",
+       y = "R²") +
+  theme_minimal()
+
+rsq_plot
 ```
+
+
+```{r }
+aic_vals <- map_dbl(model_1$final_model, AIC)
+
+aic_plot <- tibble(
+  Step = seq_along(aic_vals),
+  AIC = aic_vals
+) |>
+  ggplot(aes(x = Step, y = aic_vals)) +
+  geom_line(color = "blue") +
+  geom_point(color = "black", size = 2) +
+  labs(title = "AIC per Step of Forward Selection",
+       x = "Step",
+       y = "AIC") +
+  theme_minimal()
+
+aic_plot
+```
+### Discussion of the results
+
 
