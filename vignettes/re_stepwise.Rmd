@@ -5,20 +5,48 @@ date: "2025-05-26"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
+```{r setup,  include=FALSE}
 library(readr)
-data_stepwies <- read_csv("./data/df_for_stepwise_regression.csv")
+library(purrr)
+library(tidyverse)
+library(ggplot2)
+data_stepwise <- read_csv("../data/df_for_stepwise_regression.csv") # loading the data
+```
+In this report exercise I will perform a step wise forward regression for the
+task of modelling the GPP as a function of predictors available in the data set.
+
+For that, I start with bivariate models to evaluate which predictor fits best.
+
+```{r }
+predictors <- data_stepwise |> # defining the predictors
+  select(- siteid, -TIMESTAMP, - GPP_NT_VUT_REF) |>
+  names()
+
+bivariate_regressions <- predictors |> # creating a linear regression for each predictor
+  set_names() |>
+  map(~ lm(as.formula(paste("GPP_NT_VUT_REF", "~", .x)), data = data_stepwise))
+
+bivariate_regressions |>
+  map_dbl(~ summary(.x)$r.squared) |>
+  enframe(name = "predictor", value = "r_squared") |>
+  mutate(r_squared = round(r_squared, 3)) |>
+  ggplot2::ggplot(aes(x = reorder(predictor, r_squared), y = r_squared)) +
+  geom_col(fill = "blue") +
+  geom_text(aes(label = r_squared), hjust = -0.1, size = 3) +
+  coord_flip() +
+  labs(
+    title = "R^2 of the bivariate models",
+    x = "R^2", 
+    y = "Predictors") +
+  theme_minimal() +
+  ylim(0, 1)
+
 ```
 
+The predictor with the highest R^2 is PPFD_IN
 
 
 ```{r }
-summary(cars)
-```
 
-
-
-```{r }
-plot(pressure)
 ```
 
