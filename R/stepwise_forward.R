@@ -1,12 +1,12 @@
 # Function for stepwise forward regression
 
 stepwise_forward <- function(data, response, predictors) {
-  # strating with an empty model
+  # starting with an empty model
   best_models <- list()
   best_AICs <- c()
   current_predictors <-c()
   remaining_predictors <- predictors
-  best_AIC <- 0
+  best_AIC <- Inf
   function_stop <- FALSE
   
   while (!function_stop && length(remaining_predictors) > 0) {
@@ -27,11 +27,11 @@ stepwise_forward <- function(data, response, predictors) {
       slice(1)
     
     # compare the AIC to previous model
-    if (best_row$aic > best_AIC) {
-      best_AIC <- best_row$aic
+    if (best_row$AIC < best_AIC) {
+      best_AIC <- best_row$AIC
       current_predictors <- c(current_predictors, best_row$predictor)
       remaining_predictors <- setdiff(remaining_predictors, best_row$predictor)
-      best_models[[length(current_predictors)]] <- best_row$model[[1]]
+      best_models <- append(best_models, list(best_row$model[[1]]))
       best_AICs <- c(best_AICs, best_AIC)
     } else {
       function_stop <- TRUE
