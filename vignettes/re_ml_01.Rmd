@@ -1,0 +1,22 @@
+---
+title: "Supervised machine learning I"
+author: "Fabrice Mettler"
+date: "2025-06-02"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+```
+
+
+
+```{r cars}
+
+```
+
+
+```{r pressure, echo=FALSE}
+
+```
+
