@@ -14,9 +14,8 @@ library(caret)
 library(recipes)
 ```
 
-# Comparison of the linear regression and KNN models
-The code for the model is adopted from the chapter 10. 
-
+### Data loading and cleaning
+This step was copied from the book.
 
 ```{r}
 daily_fluxes <- read_csv("../data/FLX_CH-Dav_FLUXNET2015_FULLSET_DD_1997-2014_1-3.csv") |>  
@@ -48,19 +47,11 @@ daily_fluxes <- read_csv("../data/FLX_CH-Dav_FLUXNET2015_FULLSET_DD_1997-2014_1-
 
   # drop QC variables (no longer needed)
   dplyr::select(-ends_with("_QC"))
+
 ```
 
-# The role of k
-
-
-```{r}
-# Data cleaning: looks ok, no obviously bad data
-# no long tail, therefore no further target engineering
-daily_fluxes |> 
-  ggplot(aes(x = GPP_NT_VUT_REF, y = ..count..)) + 
-  geom_histogram()
-```
-
+### Comparison of the linear regression and KNN models
+The code is adopted from the AGDS book.
 
 ```{r}
 # Data splitting
@@ -72,7 +63,6 @@ daily_fluxes_test <- rsample::testing(split)
 # Model and pre-processing formulation, use all variables but LW_IN_F
 pp <- recipes::recipe(GPP_NT_VUT_REF ~ SW_IN_F + VPD_F + TA_F, 
                       data = daily_fluxes_train |> drop_na()) |> 
-  recipes::step_BoxCox(recipes::all_predictors()) |> 
   recipes::step_center(recipes::all_numeric(), -recipes::all_outcomes()) |>
   recipes::step_scale(recipes::all_numeric(), -recipes::all_outcomes())
 
@@ -98,7 +88,7 @@ mod_knn <- caret::train(
 
 
 ```{r}
-source("../R/eval_model_function.R")
+source("../R/eval_model_function.R") # function is kept in a separate file
 # linear regression model
 eval_model(mod = mod_lm, df_train = daily_fluxes_train, df_test = daily_fluxes_test)
 ```
@@ -108,8 +98,87 @@ eval_model(mod = mod_lm, df_train = daily_fluxes_train, df_test = daily_fluxes_t
 eval_model(mod = mod_knn, df_train = daily_fluxes_train, df_test = daily_fluxes_test)
 ```
 
+## Questitons:
+
+#### Why is the difference between the evaluation on the training and the test set larger for the KNN model than for the linear regression model?
+
+The linear regression model is less flexible then the KNN, as it  describes the relation between the predictors and the target value with a single line. It probably creates a similar bias in the training set and the test set which makes the difference of the RMSE between them very small. The KNN calculates the mean of "near" samples and can therefore better account for other patterns is the relation between predictors and target. The training set, on the other hand, may be slightly over-fitted. That's probably why we see a lower RMSE in the training set as in the test set.
+
+##### Why does the evaluation on the test set indicate a better model performance of the KNN model than the linear regression model?
+
+The smaller RMSE in the test set for the KNN model indicates that the larger flexibility of KNN model includes important pattern, which are not described by the linear regression model.
+
+#### How would you position the KNN and the linear regression model along the spectrum of the bias-variance trade-off?
+
+The linear regression model probably has a larger bias as it uses a more simple approach to describe the relation ship between predictor and target, the KNN on the other hand probably tends to more over fitting and therefore a higher variance.
+
+
+## Temporal variation of observed and modelled GPP
+
 
 ```{r}
+# first, we need to get rid of missing values
+df_test_clean <- daily_fluxes_test |>
+  drop_na()
+
+df_test_clean$GPP_pred_lm <- predict(mod_lm, newdata = df_test_clean)
+df_test_clean$GPP_pred_knn <- predict(mod_knn, newdata = df_test_clean)
+
+df_combined <- df_test_clean |> 
+  select(TIMESTAMP, GPP_NT_VUT_REF, GPP_pred_lm, GPP_pred_knn)
+
+ggplot2::ggplot(data = df_combined, aes(x = TIMESTAMP)) +
+  geom_line(aes(y = GPP_NT_VUT_REF, colour = "observed GPP"), alpha = 0.9) + 
+  geom_line(aes(y = GPP_pred_lm, colour = "Linear regression model"), alpha = 0.7) +
+  geom_line(aes(y = GPP_pred_knn, colour = "KNN model"), alpha = 0.6) + 
+  labs(title = "Temporal variation of observed and modelled GPP",
+       x = "Date",
+       y = expression("GPP (µmol " * m^{-2} * s^{-1} * ")"))
 
 ```
 
+
+# The role of k
+
+#### Based on your understanding of KNN (and without running code), state a hypothesis for how the R^2 and the MAE evaluated on the test and on the training set would change for k approaching 1 and for k approaching N (the number of observations in the data). Explain your hypothesis, referring to the bias-variance trade-off.
+
+As k approaches 1, the model becomes very flexible (low bias, high variance). For the training set, R^2 would increase and MAE decrease, as the model takes very small patterns of data into account. For the test set, R^2 decreases and MAE increases, as the model will tend to overfit. As k approaches N, the model will take more and more data points into account which increases the bias and lowers the variance in both, the training and the test set. At some point however (after k reaches a certain value), R^2 will start to decline and MAE to increase in the test set. This reflects the bias-variance trade-off as a to high smoothing leads to underfitting and a to low smoothing to an overfitting.
+
+#### Put your hypothesis to the test:
+
+```{r}
+testing_fitting <- function(k) {
+  mod_knn <- caret::train(
+  pp, 
+  data = daily_fluxes_train |> drop_na(),
+  method = "knn",
+  trControl = caret::trainControl(method = "none"),
+  tuneGrid = data.frame(k = k)
+  )
+  
+  data_clean <- daily_fluxes_test |> drop_na()
+  predicted <- predict(mod_knn, newdata = data_clean)
+  observed <- data_clean$GPP_NT_VUT_REF
+  mae_value <- mean(abs(predicted - observed))
+  
+  return(data.frame(k = k, MAE = mae_value))
+}
+
+k_values <- seq(1, 100, by = 5)
+
+results <- data.frame()
+
+for (k in k_values) {
+  result <- testing_fitting(k)
+  results <- rbind(results, result)
+}
+
+ggplot2::ggplot(results, aes(x = k, y = MAE)) +
+  geom_line(colour = "blue") +
+  geom_point(color = "black") +
+  labs(title = "Changes of MAE with increasing k")
+
+```
+
+## The optimal k
+The plot above visualizes how the MAE (Mean Absolute Error) changes with increasing k. As hypothesized, the MAE is high for small k values (overfitting), decreases until an optimal k and start to increase again (underfitting). The optimal k is around k = 16 and is visualized in the plot as the lowest value.
