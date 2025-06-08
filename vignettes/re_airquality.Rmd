@@ -4,7 +4,6 @@ author: "Fabrice Mettler"
 date: "2025-05-05"
 output: html_document
 ---
-
 ```{r setup, include=FALSE}
 library(ggplot2)
 library(readr)
@@ -14,17 +13,11 @@ library(tidyverse)
 
 airquality <- datasets::airquality # reading in the data
 ```
-## About the dataset
-The data set "airquality" contains measurements of the air quality in New York
-from May 1, 1973 to September 30, 1973. The data frame contains 153
-observations on 6 numeric variables including the mean ozone (ppb) from 1300 
-to 1500 hours at Roosevelt Island, solar radiation in Langleys in the frequency
-band 4000-7700 Angstroms from 0800 to 1200 hours at Central Park, average wind
-speed (miles/h) at 0700 and 1000 hours at LaGuardia Airport, the maximal
-temperature (°F) at LaGuardia Airport, the month of the year and the 
-day of the month.
 
-I removed NAs and introduced a new column called "Dates".
+## Description of the dataset
+The data set "airquality" contains measurements of the air quality in New York from May 1, 1973 to September 30, 1973. The data frame contains 153 observations on 6 numeric variables including the mean ozone (ppb) from 1:00 PM to 3:00 PM at Roosevelt Island, solar radiation in Langleys in the frequency band 4000-7700 Angstroms from 8:00 AM to 12:00 PM at Central Park, average wind speed (miles/h) at 7:00 AM and 10:00 AM at LaGuardia Airport, the maximal temperature (°F) at LaGuardia Airport, the month of the year and the day of the month.
+
+I removed NAs and added a new column called "Dates".
 
 ```{r}
 colSums(is.na(airquality)) # checking if there are NAs in the data set
@@ -45,9 +38,11 @@ knitr::kable(head(airquality_clean)) # presenting an overview of the data set
 What is the temporal pattern of ozone over the analysed time (May - September) 
 and how does it correlate with temperature?
 
+Since near-surface ozone is produced by chemical reactions, and high temperatures usually make such reactions faster, I expect the ozone concentration to be higher on warmer days.
+
 ### Analysis
 To get an overview of the data, I present the range and mean of
-measured ozone and the temperature.
+measured ozone and temperature.
 
 ```{r}
 summary_airquality <- airquality_clean |>
@@ -64,12 +59,11 @@ knitr::kable(summary_airquality, caption = "Some Summaries of the data set")
 
 ```
 
-The first plot presents the measured ozone over time:
 
 ```{r}
-ggplot(airquality_clean, aes(x = Dates, y = Ozone, colour = Temp)) +
-  geom_point() +
-  geom_line() +  # optional: connects the points in order
+ggplot(airquality_clean, aes(x = Dates, y = Ozone)) +
+  geom_point(aes(colour = Temp), size = 3) +
+  geom_line() +
   labs(title = "Temporal pattern of ozone", 
        x = "Date",
        y = "Ozone (ppb)",
@@ -79,6 +73,8 @@ ggplot(airquality_clean, aes(x = Dates, y = Ozone, colour = Temp)) +
 
 ```
 
+The first plot shows the measured ozone concentration over time. The color of the line represents temperature, allowing an additional axis. As expected, temperatures are higher in the summer months (JJA) compared to May and September. During this period, ozone levels were not only higher, but also exhibited greater variability. interestingly, some days show unusually high ozone levels that do not coincide with particularly high temperatures. This indicate, that while temperature might be an important factor, ozone concentration likely also depends on other factors.
+
 
 ```{r}
 ggplot(
@@ -86,23 +82,25 @@ ggplot(
   aes(x = Temp, y = Ozone, colour = factor(Month))) +
   geom_point(alpha = 1) +
   geom_smooth(method = "lm", se = FALSE) +
-  labs(title = "Plot", 
+  labs(title = "Linear regression", 
        x = "Temperature (°F)",
        y = "Ozone (ppb)",
        color = "Month") +
   scico::scale_color_scico_d(palette = "romaO")
 ```
 
+To further investigate the relation between temperature and the ozone concentration, I created a plot showing a linear regression between the two variables for each month separately. The slopes for the cooler months (May, April, September) are quite similar but differ noticeably from the slopes observed in June and August. This indicates that the relationship between temperature and ozone concentration is probably not strictly linear over the entire season. Although, a positive correlation between temperature and ozone is apparent, it is important to distinguish between correlation and causation.
+
 ```{r}
-ozone_residuals <- lm(Ozone ~ Temp, data = airquality_clean)$residuals
-
-
 ggplot(
   data = airquality_clean,
-  aes(x = Dates, y = Ozone, colour = Temp)) +
-  geom_point(alpha = 1) +
-  labs(x = "Temperature (F)",
-       y = "Ozone (ppb)")
+  aes(x = factor(Month), y = Ozone)) +
+  geom_boxplot(fill = "grey", outlier.shape = NA) +
+  geom_jitter(width = 0.2, alpha = 0.3) +
+  labs(title = "Boxplot comparing mean ozone per month",
+       x = "Month",
+       y = "Ozone (ppb)"
+  )
 ```
 
-
+Finally, I created box plots to visualize the difference in the distribution and the mean of ozone concentration across the months. Overall we see a general pattern: higher ozone levels tend to occur during months with higher temperatures. However it is important to to note that this is a visual correlation and we cannot draw firm conclusions about strength and significance of the relationship without further analysis.
