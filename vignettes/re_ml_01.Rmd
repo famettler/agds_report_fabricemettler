@@ -2,7 +2,9 @@
 title: "Supervised machine learning I"
 author: "Fabrice Mettler"
 date: "2025-06-02"
-output: html_document
+output:
+  html_document:
+  toc: true
 ---
 
 ```{r setup, include=FALSE}
@@ -14,7 +16,7 @@ library(caret)
 library(recipes)
 ```
 
-### Data loading and cleaning
+# Data loading and cleaning
 This step was copied from the book.
 
 ```{r}
@@ -50,8 +52,8 @@ daily_fluxes <- read_csv("../data/FLX_CH-Dav_FLUXNET2015_FULLSET_DD_1997-2014_1-
 
 ```
 
-### Comparison of the linear regression and KNN models
-The code is adopted from the AGDS book.
+# Comparison of the linear regression and KNN models
+The code is adopted from the book.
 
 ```{r}
 # Data splitting
@@ -86,6 +88,7 @@ mod_knn <- caret::train(
 )
 ```
 
+## Linear Regression Model
 
 ```{r}
 source("../R/eval_model_function.R") # function is kept in a separate file
@@ -93,16 +96,18 @@ source("../R/eval_model_function.R") # function is kept in a separate file
 eval_model(mod = mod_lm, df_train = daily_fluxes_train, df_test = daily_fluxes_test)
 ```
 
+## KNN Model
+
 ```{r}
 # KNN
 eval_model(mod = mod_knn, df_train = daily_fluxes_train, df_test = daily_fluxes_test)
 ```
 
-## Questitons:
+## Questions:
 
 #### Why is the difference between the evaluation on the training and the test set larger for the KNN model than for the linear regression model?
 
-The linear regression model is less flexible then the KNN, as it  describes the relation between the predictors and the target value with a single line. It probably creates a similar bias in the training set and the test set which makes the difference of the RMSE between them very small. The KNN calculates the mean of "near" samples and can therefore better account for other patterns is the relation between predictors and target. The training set, on the other hand, may be slightly over-fitted. That's probably why we see a lower RMSE in the training set as in the test set.
+The linear regression model is less flexible then the KNN, as it describes the relation between the predictors and the target value with a single line. It probably creates a similar bias in the training set and the test set which makes the difference of the RMSE between them very small. The KNN calculates the mean of "near" samples and can therefore better account for other patterns in the relation between predictors and target. The training set, on the other hand, may be slightly over-fitted. That's probably why we see a lower RMSE in the training set as in the test set.
 
 ##### Why does the evaluation on the test set indicate a better model performance of the KNN model than the linear regression model?
 
@@ -110,7 +115,7 @@ The smaller RMSE in the test set for the KNN model indicates that the larger fle
 
 #### How would you position the KNN and the linear regression model along the spectrum of the bias-variance trade-off?
 
-The linear regression model probably has a larger bias as it uses a more simple approach to describe the relation ship between predictor and target, the KNN on the other hand probably tends to more over fitting and therefore a higher variance.
+The linear regression model probably has a larger bias as it uses a more simple approach to describe the relation ship between predictor and target, the KNN on the other hand probably tends to more over fitting and has therefore a higher variance.
 
 
 ## Temporal variation of observed and modelled GPP
@@ -165,9 +170,7 @@ testing_fitting <- function(k) {
 }
 
 k_values <- seq(1, 100, by = 5)
-
 results <- data.frame()
-
 for (k in k_values) {
   result <- testing_fitting(k)
   results <- rbind(results, result)
