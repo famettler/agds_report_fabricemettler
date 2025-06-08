@@ -15,7 +15,7 @@ library(ggplot2)
 library(scales)
 data_stepwise <- read_csv("../data/df_for_stepwise_regression.csv") # loading the data
 ```
-In this report exercise I will perform a step wise forward regression for the task of modelling the GPP (GPP_NT_VUT_REF) as a function of predictors available in the data set. The data set contains air temperature (TA_F), incoming short-wave radiation (SW_IN_F), incoming long-wave radiation (LW_IN_F), vapor pressure deficit (VPD_F), atmospheric pressure (PA), precipitation (P), wind speed (WS), incoming photosynthetic photon flux density (PPFD_IN), CO2 (CO2_F_MDS) and friction velocity (USTAR).
+In this report exercise I will perform a stepwise forward regression for the task of modelling the GPP (GPP_NT_VUT_REF) as a function of predictors available in the data set. The data set contains air temperature (TA_F), incoming short-wave radiation (SW_IN_F), incoming long-wave radiation (LW_IN_F), vapor pressure deficit (VPD_F), atmospheric pressure (PA), precipitation (P), wind speed (WS), incoming photosynthetic photon flux density (PPFD_IN), CO2 (CO2_F_MDS) and friction velocity (USTAR).
 
 ## Evaluation of the bivariate models
 For that, I start with bivariate models to evaluate which single predictor fits best.
@@ -46,7 +46,7 @@ bivariate_regressions |>
 
 ```
 
-The highest correlation is achieved with the predictor PPFD_IN (R² = 0.452) which is expected as plants use energy of photons and when there are more more photons available, plants can produce more biomass. We can also see that predictors which were gap filled with MDS (end with _MDS) have a very similar R² to the same predictor without gap filling, which is also very intuitive.
+The highest correlation is observed with the predictor PPFD_IN (R² = 0.452) which is expected since plants use photon energy for photosynthesis. When more photons are available, plants assimilate more CO2. We can also see that predictors which were gap filled with MDS (end with _MDS) have a very similar R² to the same predictor without gap filling, which is also very intuitive. The friction velocity and the atmospheric pressure show no correlation. Precipitation has a very low correlation with the GPP, which is explainable as precipitation usually comes with high cloud cover and therefore low sun light which reduces photosynthesis.
 
 ## Stepwise forward regression
 
@@ -96,9 +96,10 @@ aic_plot <- tibble(
 
 aic_plot
 ```
-### Discussion of the results
-In the figures above we see the improvement of the R² over the single steps of the step-wise forward regression. R² improves with a saturation curve, which means that the first 4 predictors contribute much to the model improvement while while the rest of the predictors only lead to slight improvement.
-In the second plot, the AIC is presented over the single steps of the step-wise regression. Similar to the R², the AIC improves a lot until the first 4 steps when the improvement continues on a low level.
-The 
 
+### Discussion of the results
+In the figures above we see the improvement of the R² over the single steps of the step-wise forward regression. R² improves with a saturation curve, which means that the first 4 predictors contribute much to the model improvement while the rest of the predictors only lead to slight improvement.
+In the second plot, the AIC is presented over the single steps of the step-wise regression. Similar to the R², the AIC improves a lot until the first 4 steps when the improvement continues on a low level.
+From the result of the model, we see that out of the 14 possible predictors, the final model includes 9 of them. We also see that for predictors where gap-filled data was available, only one was used (either the gad-filled data or the non-gap-filled data). It is easy to imagine that the second predictor did not further improve the model, as most of the information was already included in the first one.
+Finally, i was wondering if it makes sense to accept a new predictor although it lead only to a very small improvement. It might be more appropriate to define a certain threshold, which a new predictor has to overcome in order to be included into the model. However, I assume this decision ultimately depends on the specific modeling context and objectives (e.g., model simplicity vs. predictive accuracy).
 
