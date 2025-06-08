@@ -1,0 +1,12 @@
+---
+title: "Collaborative Work on Github"
+author: "Fabrice Mettler"
+date: "2025-06-08"
+output: html_document
+---
+
+Following, I provide the links for the two repositories: 
+
+Repository that my friend forked from me: https://github.com/famettler/collaborative_work
+
+Repository that I forked from my friend: https://github.com/famettler/re_paircoding_FM
