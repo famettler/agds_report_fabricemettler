@@ -1,11 +1,9 @@
 ---
-title: "Soil organic carbon measurements"
+title: "Analyzing changes in soil organic matter during elevated CO experiments"
 author: "Fabrice Mettler"
 date: "2025-05-05"
 output: html_document
 ---
-
-# Setup
 ```{r setup, include=FALSE}
 library(dplyr)
 library(lubridate)
@@ -13,10 +11,33 @@ library(tidyr)
 library(readr)
 library(stringr)
 library(purrr)
-soil_organic <- read_csv("../data/1249534s1-s6 Kopie.csv") # reading in the data
+soil_organic_carbon <- read_csv("../data/SOC_Measurements.csv") # reading in the data
 ```
 
-# Calculation of the log-response ratio within each experiment
+### General informations
+
+#### What are the data that you are looking at?
+
+In this exercise, we investigate the data published by Groeningen et al. (2014) (https://doi.org/10.1126/science.1249534). They gathered data from different experiments on changes in soil organic compounds on areas where the ecosystem was exposed to elevated CO2 concentrations. The data contains the mean of the measured CO2 (in g C m^-2) under ambient and increased conditions, the sample date (date) and the duration of the experiment (time in years). 
+
+#### What do you expect your analysis to show, what is your hypothesis? How should soil organic matter content change under elevated CO?
+
+I think that elevated CO2 levels in the atmosphere has an effect on different processes. Some plants are limited in growth by CO2 which means that a higher CO2 availability will increase their growth. This may lead to increased root growth and increased amount of plant litter. At some point, plant growth is no longer limited by CO2 and further increasing of CO2 levels will no longer effect plant growth positively. Therefore, I expect increased atmospheric CO2 to have a minor positive effect on soil organic compound (the Log response ratio (LRR) to be slightly positive).
+
+#### Interpret your results after aggregating the data: What do your final numbers mean? Do they support your initial hypothesis? Why so, why not?
+
+There are differences of the LRR across the different experiments as some show
+positive values and other negative. Overall, the analysis suggest that
+elevated CO2 has only a minor effect on SOC, which is on average positive. The results of this analysis supports my hypothesis.
+
+### The data
+
+```{r}
+head(soil_organic_carbon)
+```
+
+### Calculation of the log-response ratio within each experiment
+
 ```{r}
 soil_organic_carbon |>
   dplyr::mutate(
@@ -26,7 +47,8 @@ soil_organic_carbon |>
   knitr::kable(col.names = c("Experiment", "Mean Log Response Ratio"))
 ```
 
-# Calculation of the log-response ratio for thre phases
+### Calculation of the log-response ratio for three phases
+
 ```{r}
 soil_organic_carbon |>
   filter(time < 3) |> 
@@ -50,31 +72,6 @@ soil_organic_carbon |>
 ```
 
 
-# My answers to the following questions:
-
-### What are the data that you are looking at?
-In this exercise, we investigate the data published by Groeningen et al. (2014)
-(https://doi.org/10.1126/science.1249534). They gathered data from different
-experiments on changes in soil organic compounds on areas where the ecosystem was
-exposed to elevated CO2 concentrations. The data contains the mean of the measured
-CO2 (in g C m^-2) under ambient and increased conditions, the sample date (date)
-and the duration of the experiment (time in years). 
-
-### What do you expect your analysis to show, what is your hypothesis? How should
-### soil organic matter content change under elevated CO?
-I think that elevated CO2 levels in the atmosphere has an effect on different 
-processes. Some plants are limited in growth by CO2 which means that a higher 
-CO2 availability will increase their growth. This may lead to increased root 
-growth and increased amount of plant litter. At some point, plant growth is no
-longer limited by CO2 and further increasing of CO2 levels will no longer effect plant growth positively. Therefore, I expect increased atmospheric CO2 to have a minor positive
-effect on soil organic compound. Therefore I expect the Log response ratio (LRR)
-to be slightly positive.
-
-###Interpret your results after aggregating the data: What do your final 
-numbers mean? Do they support your initial hypothesis? Why so, why not?
-There are differences of the LRR across the different experiments as some show
-positive values and other negative. Overall, the analysis suggest that
-elevated CO2 has only a minor effect on SOC.
 
 
 
