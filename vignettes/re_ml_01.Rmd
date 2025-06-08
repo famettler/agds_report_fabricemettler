@@ -133,7 +133,7 @@ df_combined <- df_test_clean |>
   select(TIMESTAMP, GPP_NT_VUT_REF, GPP_pred_lm, GPP_pred_knn)
 
 ggplot2::ggplot(data = df_combined, aes(x = TIMESTAMP)) +
-  geom_line(aes(y = GPP_NT_VUT_REF, colour = "observed GPP"), alpha = 0.9) + 
+  geom_line(aes(y = GPP_NT_VUT_REF, colour = "Observed GPP"), alpha = 0.9) + 
   geom_line(aes(y = GPP_pred_lm, colour = "Linear regression model"), alpha = 0.7) +
   geom_line(aes(y = GPP_pred_knn, colour = "KNN model"), alpha = 0.6) + 
   labs(title = "Temporal variation of observed and modelled GPP",
