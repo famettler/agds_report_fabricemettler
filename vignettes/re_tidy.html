@@ -13,7 +13,7 @@
 
 <meta name="date" content="2025-05-05" />
 
-<title>Soil organic carbon measurements</title>
+<title>Analyzing changes in soil organic matter during elevated CO experiments</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -350,46 +350,66 @@ display: none;
 
 
 
-<h1 class="title toc-ignore">Soil organic carbon measurements</h1>
+<h1 class="title toc-ignore">Analyzing changes in soil organic matter
+during elevated CO experiments</h1>
 <h4 class="author">Fabrice Mettler</h4>
 <h4 class="date">2025-05-05</h4>
 
 </div>
 
 
-<div id="setup" class="section level1">
-<h1>Setup</h1>
-<pre class="r"><code>library(dplyr)</code></pre>
-<pre><code>## 
-## Attaching package: &#39;dplyr&#39;</code></pre>
-<pre><code>## The following objects are masked from &#39;package:stats&#39;:
-## 
-##     filter, lag</code></pre>
-<pre><code>## The following objects are masked from &#39;package:base&#39;:
-## 
-##     intersect, setdiff, setequal, union</code></pre>
-<pre class="r"><code>library(lubridate)</code></pre>
-<pre><code>## 
-## Attaching package: &#39;lubridate&#39;</code></pre>
-<pre><code>## The following objects are masked from &#39;package:base&#39;:
-## 
-##     date, intersect, setdiff, union</code></pre>
-<pre class="r"><code>library(tidyr)
-library(readr)
-library(stringr)
-library(purrr)
-soil_organic_carbon&lt;- read_csv(&quot;1249534s1-s6.csv&quot;) # reading in the data</code></pre>
-<pre><code>## Rows: 234 Columns: 11</code></pre>
-<pre><code>## ── Column specification ────────────────────────────────────────────────────────
-## Delimiter: &quot;,&quot;
-## chr (5): experiment, citation, depth, source, value_treatment
-## dbl (6): date, time, mean_ambient, mean_increased, n_ambient, n_increased
-## 
-## ℹ Use `spec()` to retrieve the full column specification for this data.
-## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<div id="general-informations" class="section level3">
+<h3>General informations</h3>
+<div id="what-are-the-data-that-you-are-looking-at" class="section level4">
+<h4>What are the data that you are looking at?</h4>
+<p>In this exercise, we investigate the data published by Groeningen et
+al. (2014) (<a href="https://doi.org/10.1126/science.1249534" class="uri">https://doi.org/10.1126/science.1249534</a>). They gathered
+data from different experiments on changes in soil organic compounds on
+areas where the ecosystem was exposed to elevated CO2 concentrations.
+The data contains the mean of the measured CO2 (in g C m^-2) under
+ambient and increased conditions, the sample date (date) and the
+duration of the experiment (time in years).</p>
 </div>
-<div id="calculation-of-the-log-response-ratio-within-each-experiment" class="section level1">
-<h1>Calculation of the log-response ratio within each experiment</h1>
+<div id="what-do-you-expect-your-analysis-to-show-what-is-your-hypothesis-how-should-soil-organic-matter-content-change-under-elevated-co" class="section level4">
+<h4>What do you expect your analysis to show, what is your hypothesis?
+How should soil organic matter content change under elevated CO?</h4>
+<p>I think that elevated CO2 levels in the atmosphere has an effect on
+different processes. Some plants are limited in growth by CO2 which
+means that a higher CO2 availability will increase their growth. This
+may lead to increased root growth and increased amount of plant litter.
+At some point, plant growth is no longer limited by CO2 and further
+increasing of CO2 levels will no longer effect plant growth positively.
+Therefore, I expect increased atmospheric CO2 to have a minor positive
+effect on soil organic compound (the Log response ratio (LRR) to be
+slightly positive).</p>
+</div>
+<div id="interpret-your-results-after-aggregating-the-data-what-do-your-final-numbers-mean-do-they-support-your-initial-hypothesis-why-so-why-not" class="section level4">
+<h4>Interpret your results after aggregating the data: What do your
+final numbers mean? Do they support your initial hypothesis? Why so, why
+not?</h4>
+<p>There are differences of the LRR across the different experiments as
+some show positive values and other negative. Overall, the analysis
+suggest that elevated CO2 has only a minor effect on SOC, which is on
+average positive. The results of this analysis supports my
+hypothesis.</p>
+</div>
+</div>
+<div id="the-data" class="section level3">
+<h3>The data</h3>
+<pre class="r"><code>head(soil_organic_carbon)</code></pre>
+<pre><code>## # A tibble: 6 × 11
+##   experiment    citation depth  date  time mean_ambient mean_increased n_ambient
+##   &lt;chr&gt;         &lt;chr&gt;    &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt;        &lt;dbl&gt;          &lt;dbl&gt;     &lt;dbl&gt;
+## 1 ArizonaFACE … Leavitt… 0-15   1995   0           1344           1228         4
+## 2 ArizonaFACE … Leavitt… 0-15   1996   0.5         1363           1305         4
+## 3 ArizonaFACE … Leavitt… 0-15   1996   1           1254           1264         4
+## 4 ArizonaFACE … Leavitt… 0-15   1997   1.5         1258           1400         4
+## 5 Biosphere 2   Trueman… 0-25   1999   0           5950           6362         1
+## 6 Biosphere 3   Trueman… 0-25   2000   1           5254           4735         1
+## # ℹ 3 more variables: n_increased &lt;dbl&gt;, source &lt;chr&gt;, value_treatment &lt;chr&gt;</code></pre>
+</div>
+<div id="calculation-of-the-log-response-ratio-within-each-experiment" class="section level3">
+<h3>Calculation of the log-response ratio within each experiment</h3>
 <pre class="r"><code>soil_organic_carbon |&gt;
   dplyr::mutate(
     log_RR = log(mean_increased/mean_ambient, base = exp(1))) |&gt;
@@ -635,8 +655,8 @@ soil_organic_carbon&lt;- read_csv(&quot;1249534s1-s6.csv&quot;) # reading in the
 </tbody>
 </table>
 </div>
-<div id="calculation-of-the-log-response-ratio-for-thre-phases" class="section level1">
-<h1>Calculation of the log-response ratio for thre phases</h1>
+<div id="calculation-of-the-log-response-ratio-for-three-phases" class="section level3">
+<h3>Calculation of the log-response ratio for three phases</h3>
 <pre class="r"><code>soil_organic_carbon |&gt;
   filter(time &lt; 3) |&gt; 
   mutate(phase = &quot;early&quot;) |&gt; # creating new column called: phase
@@ -677,37 +697,6 @@ soil_organic_carbon&lt;- read_csv(&quot;1249534s1-s6.csv&quot;) # reading in the
 </tr>
 </tbody>
 </table>
-</div>
-<div id="my-answers-to-the-following-questions" class="section level1">
-<h1>My answers to the following questions:</h1>
-<div id="what-are-the-data-that-you-are-looking-at" class="section level3">
-<h3>What are the data that you are looking at?</h3>
-<p>In this exercise, we investigate the data published by Groeningen et
-al. (2014) (<a href="https://doi.org/10.1126/science.1249534" class="uri">https://doi.org/10.1126/science.1249534</a>). They gathered
-data from different experiments on changes in soil organic compounds on
-areas where the ecosystem was exposed to elevated CO2 concentrations.
-The data contains the mean of the measured CO2 (in g C m^-2) under
-ambient and increased conditions, the sample date (date) and the
-duration of the experiment (time in years).</p>
-</div>
-<div id="what-do-you-expect-your-analysis-to-show-what-is-your-hypothesis-how-should" class="section level3">
-<h3>What do you expect your analysis to show, what is your hypothesis?
-How should</h3>
-</div>
-<div id="soil-organic-matter-content-change-under-elevated-co" class="section level3">
-<h3>soil organic matter content change under elevated CO?</h3>
-<p>I think that elevated CO2 levels in the atmosphere has an effect on
-different processes. Some plants are limited in growth by CO2 which
-means that a higher CO2 availability will increase their growth. This
-may lead to increased root growth and increased amount of plant litter.
-At some point, plant growth is no longer limited by CO2 and further
-increasing of CO2 levels will no longer effect plant growth positively.
-Therefore, I expect increased atmospheric CO2 to have a minor positive
-effect on soil organic compound.</p>
-<p>###Interpret your results after aggregating the data: What do your
-final numbers mean? Do they support your initial hypothesis? Why so, why
-not?</p>
-</div>
 </div>
 
 
